@@ -5,13 +5,13 @@ using Spectre.Console;
 using File = System.IO.File;
 using Version = Modrinth.Models.Version;
 
-namespace MinecraftModCompatabilityChecker;
+namespace MinecraftModCompatibilityChecker;
 
 internal class Program
 {
     private static readonly ModrinthClient Client = new(new ModrinthClientConfig
     {
-        UserAgent = "MinecraftModCompatabilityChecker/1.0.1"
+        UserAgent = "MinecraftModCompatibilityChecker/1.0.1"
     });
 
     private static readonly HashSet<string> Loaders = new(StringComparer.OrdinalIgnoreCase)
