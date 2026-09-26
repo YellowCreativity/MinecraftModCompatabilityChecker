@@ -11,7 +11,7 @@ internal class Program
 {
     private static readonly ModrinthClient Client = new(new ModrinthClientConfig
     {
-        UserAgent = "MinecraftModCompatibilityChecker/1.0.1"
+        UserAgent = "MinecraftModCompatibilityChecker/1.0.2"
     });
 
     private static readonly HashSet<string> Loaders = new(StringComparer.OrdinalIgnoreCase)
