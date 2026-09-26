@@ -74,7 +74,7 @@ internal class Program
                         projectVersions[project] =
                             await Client.Version.GetProjectVersionListAsync(
                                 project.Id,
-                                [targetLoader, "minecraft", "datapack"]
+                                [targetLoader, "minecraft", "datapack", "iris", "optifine"]
                             );
                     }
                 });
@@ -84,7 +84,7 @@ internal class Program
             var universallySupported = uniqueVersions
                 .Where(version => projects.All(project =>
                     projectVersions[project].Any(projectVersion =>
-                        IsProjectSupported(projectVersion, version, targetLoader))))
+                        IsProjectSupported(projectVersion, targetLoader, version))))
                 .ToHashSet();
 
             var table = new Table()
@@ -105,7 +105,7 @@ internal class Program
                 .OrderByDescending(project =>
                     uniqueVersions.Count(version =>
                         projectVersions[project].Any(projectVersion =>
-                            IsProjectSupported(projectVersion, version, targetLoader))))
+                            IsProjectSupported(projectVersion, targetLoader, version))))
                 .ThenByDescending(project => project.Id)
                 .ToArray();
 
@@ -116,8 +116,7 @@ internal class Program
                 var versions = projectVersions[project];
 
                 var isLoaderSupported = versions.Any(version =>
-                    version.Loaders.Contains(targetLoader) || version.Loaders.Contains("minecraft") ||
-                    version.Loaders.Contains("datapack"));
+                    IsProjectSupported(version, targetLoader));
                 if (!isLoaderSupported)
                     AnsiConsole.MarkupLine(
                         $"[red]✗ [bold]{title}[/] does not support {ColorfulLoaderText(targetLoader)}, supported loader(s):[/] {string.Join(", ", project.Loaders.Select(ColorfulLoaderText))}");
@@ -125,7 +124,7 @@ internal class Program
                 var supportedVersions = uniqueVersions
                     .Select(version =>
                         versions.Any(projectVersion =>
-                            IsProjectSupported(projectVersion, version, targetLoader)))
+                            IsProjectSupported(projectVersion, targetLoader, version)))
                     .ToArray();
 
                 var supportedVersionMarkup = supportedVersions
@@ -154,7 +153,7 @@ internal class Program
                     Version = version,
                     Count = projects.Count(project =>
                         projectVersions[project].Any(projectVersion =>
-                            IsProjectSupported(projectVersion, version, targetLoader)))
+                            IsProjectSupported(projectVersion, targetLoader, version)))
                 })
                 .OrderByDescending(x => x.Count)
                 .ThenByDescending(x => x.Version)
@@ -174,10 +173,12 @@ internal class Program
         }
     }
 
-    private static bool IsProjectSupported(Version version, string gameVersion, string loader)
+    private static bool IsProjectSupported(Version version, string loader, string? gameVersion = null)
     {
-        return version.GameVersions.Contains(gameVersion) &&
-               (version.Loaders.Contains(loader) || version.Loaders.Contains("minecraft"));
+        return (gameVersion is null || version.GameVersions.Contains(gameVersion)) &&
+               (version.Loaders.Contains(loader) ||
+                version.Loaders.Contains("minecraft") ||
+                version.Loaders.Contains("iris"));
     }
 
     private static string[] GetUniqueGameVersionsAcrossProjects(IEnumerable<Project> projects)
@@ -255,6 +256,8 @@ internal class Program
             "nilloader" => ("NilLoader", "#f45e9a"),
             "datapack" => ("Datapack", "#ffffff"),
             "minecraft" => ("Minecraft", "#ffffff"),
+            "iris" => ("Iris", "#ffffff"),
+            "optifine" => ("Optifine", "#ffffff"),
             _ => throw new NotSupportedException($"Unsupported loader: {loaderText}")
         };
 
